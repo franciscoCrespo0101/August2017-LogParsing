@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Encoding;
+using System.Text;
 using Amazon.Lambda.Core;
 using Amazon.S3;
 using Amazon.S3.Model;
@@ -33,7 +33,7 @@ namespace LogParser {
             Console.WriteLine($"THIS IS THE DATA: {logsData}");
             var decompressedData = DecompressLogData(logsData);
             Console.WriteLine($"THIS IS THE DECODED, UNCOMPRESSED DATA: {decompressedData}");
-            
+
             // Level 2: Parse log records
             var athenaFriendlyJson = ParseLog(decompressedData);
 
@@ -56,8 +56,8 @@ namespace LogParser {
             }
         }
 
-        private static IEnumerable<string> ParseLog(string data) {
-            throw new NotImplementedException();
+        private static DecompressedEvents ParseLog(string data) {
+            return JsonConvert.DeserializeObject<DecompressedEvents>(data);
         }
 
         public void PutObject(IEnumerable<string> values) {
