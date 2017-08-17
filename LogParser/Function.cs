@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Encoding;
 using Amazon.Lambda.Core;
 using Amazon.S3;
 using Amazon.S3.Model;
@@ -43,7 +44,9 @@ namespace LogParser {
         }
         
         public static string DecompressLogData(string value) {
-            throw new NotImplementedException();
+            byte[] data = Convert.FromBase64String(value);
+            string decodedString = System.Text.UTF8Encoding.UTF8.GetString(data);
+            return decodedString;
         }
 
         private static IEnumerable<string> ParseLog(string data) {
