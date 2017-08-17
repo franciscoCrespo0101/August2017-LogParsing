@@ -56,8 +56,8 @@ namespace LogParser {
             }
         }
 
-        private static IEnumerable<string> ParseLog(string data) {
-            throw new NotImplementedException();
+        private static DecompressedEvents ParseLog(string data) {
+            return JsonConvert.DeserializeObject<DecompressedEvents>(data);
         }
 
         public void PutObject(IEnumerable<string> values) {
