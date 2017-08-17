@@ -92,11 +92,14 @@ namespace LogParser {
             
         }
 
-        public void PutObject(DecompressedEvents values) {
+        public void PutObject(List<TwitterData> values) {
             var request = new PutObjectRequest();
+            request.ContentBody = JsonConvert.SerializeObject(values);
             request.BucketName = logsBucket;
-            request.Key = "";
-            request.Headers.ContentType = "application/json";
+            request.Key = $"NewContent-{DateTime.Now}";
+            request.ContentType = "application/json";
+            request.CannedACL = S3CannedACL.PublicRead;
+            _s3Client.PutObjectAsync(request);
         }
     }
 }
