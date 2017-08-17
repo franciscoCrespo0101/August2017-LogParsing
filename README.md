@@ -157,7 +157,7 @@ Repeat these steps for each entry in your logs.
 > Not all tweets have the same sections, for example, not all tweets have location information. You must account for missing data!
 
 
-## Level 3 - Save data to S3
+## Level 4 - Save data to S3
 Put each JSON object in a file in S3. Each JSON object must be a single line, and each file can contain one or more lines.
 
 This is important because Athena will count each line as a new record.
@@ -169,7 +169,7 @@ This is important because Athena will count each line as a new record.
 >*BONUS 2*: 
 > Compress the file before putting it into S3. (Bonus 1 and 2 are not mutually exclusive)
 
-### Level 4 - Set up Athena
+### Level 5 - Set up Athena
 Set up an Athena database called `lambdasharp_logs`, and create a table that defines the schema of the parsed JSON. The following is a minimal example, add additional fields for information found in the log streams.
 
 ```sql
