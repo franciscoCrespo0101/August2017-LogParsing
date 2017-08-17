@@ -44,9 +44,16 @@ namespace LogParser {
         }
         
         public static string DecompressLogData(string value) {
-            byte[] data = Convert.FromBase64String(value);
-            string decodedString = System.Text.UTF8Encoding.UTF8.GetString(data);
-            return decodedString;
+            var b = Convert.FromBase64String(value);
+            using (var msi = new MemoryStream(b))
+            using (var mso = new MemoryStream()) {
+                using (var gs = new GZipStream(msi, CompressionMode.Decompress)) {
+                    //gs.CopyTo(mso);
+                    gs.CopyTo(mso);
+                }
+
+                return Encoding.UTF8.GetString(mso.ToArray());
+            }
         }
 
         private static IEnumerable<string> ParseLog(string data) {
