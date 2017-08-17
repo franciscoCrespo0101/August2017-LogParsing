@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Amazon.Lambda.Core;
 using Amazon.S3;
 using Amazon.S3.Model;
@@ -56,12 +57,46 @@ namespace LogParser {
             }
         }
 
-        private static DecompressedEvents ParseLog(string data) {
-            return JsonConvert.DeserializeObject<DecompressedEvents>(data);
+        private static List<TwitterData> ParseLog(string data) {
+            var myObject = JsonConvert.DeserializeObject<DecompressedEvents>(data);
+            var twitterDataArr = myObject.LogEvents.AsParallel().WithDegreeOfParallelism(8).Select(x => {
+                var messageArr = x.Message.Split(new[] { "λ" }, StringSplitOptions.None);
+                var matchPattern = @"(\(\w+\))";
+                var userList = Regex.Matches(messageArr[0], matchPattern).Cast<Match>().Select(str => str.Value).ToList();
+                var messageList = Regex.Matches(messageArr[1], matchPattern).Cast<Match>().Select(str => str.Value).ToList();
+                var tweetList = Regex.Matches(messageArr[2], matchPattern).Cast<Match>().Select(str => str.Value).ToList();
+                var userInfo = new UserInfo{
+                    UserName = userList[0],
+                    DisplayName = userList[1],
+                    FavoriteTweets = userList[2],
+                    TweetedTimes = userList[3],
+                    Friends = userList[4],
+                    Following = userList[5],
+                    Created = userList[6]
+                };
+                var messageInfo = new MessageInfo {
+                    UserName = messageList[0],
+                    Message = messageList[1]
+                };
+                var tweetInfo = new TweetInfo {
+                    Retweet = tweetList[0],
+                    Favorited = tweetList[1]
+                };
+                return new TwitterData {
+                    User = userInfo,
+                    Message = messageInfo,
+                    Tweet = tweetInfo
+                };
+            }).ToList();
+            return twitterDataArr;
+            
         }
 
-        public void PutObject(IEnumerable<string> values) {
-            throw new NotImplementedException();
+        public void PutObject(DecompressedEvents values) {
+            var request = new PutObjectRequest();
+            request.BucketName = logsBucket;
+            request.Key = "";
+            request.Headers.ContentType = "application/json";
         }
     }
 }
